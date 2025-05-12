@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 
 def fibonacci(n: int) -> int:
@@ -13,8 +13,12 @@ def fibonacci(n: int) -> int:
 class FibonacciService:
     def __init__(self):
         self._numbers = [0, 1]
+        self._blacklisted = set()
 
-    def by_number(self, n: int) -> int:
+    def by_number(self, n: int) -> Optional[int]:
+        if n in self._blacklisted:
+            return None
+
         if n >= len(self._numbers):
             self._fill_up_to(n)
 
@@ -25,6 +29,12 @@ class FibonacciService:
             self._fill_up_to(to)
 
         return self._numbers[from_:to]
+
+    def blacklist_by_number(self, n: int) -> None:
+        self._blacklisted.add(n)
+
+    def whitelist_by_number(self, n: int) -> None:
+        self._blacklisted.remove(n)
 
     def _fill_up_to(self, to: int) -> None:
         new_numbers = []

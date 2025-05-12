@@ -66,3 +66,22 @@ class TestFibonacciService:
     def test_by_range(from_, to, result):
         fibo = FibonacciService()
         assert fibo.by_range(from_, to) == result
+
+    @staticmethod
+    def test_blacklist_by_number():
+        fibo = FibonacciService()
+        assert fibo.by_number(5) == 5
+
+        fibo.blacklist_by_number(5)
+
+        assert fibo.by_number(5) is None
+
+    @staticmethod
+    def test_whitelist_by_number():
+        fibo = FibonacciService()
+        fibo.blacklist_by_number(5)
+        assert fibo.by_number(5) is None
+
+        fibo.whitelist_by_number(5)
+
+        assert fibo.by_number(5) == 5
