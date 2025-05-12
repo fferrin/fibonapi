@@ -19,7 +19,7 @@ class FibonacciService:
         if to >= len(self._numbers):
             self._fill_up_to(to)
 
-        return self._numbers[from_:to]
+        return [x for x in self._numbers[from_:to] if x not in self._blacklisted]
 
     def blacklist_by_number(self, n: int) -> None:
         self._blacklisted.add(n)

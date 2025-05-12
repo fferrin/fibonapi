@@ -54,17 +54,21 @@ class TestFibonacciService:
     def test_blacklist_by_number():
         fibo = FibonacciService()
         assert fibo.by_number(5) == 5
+        assert fibo.by_range(0, 6) == [0, 1, 1, 2, 3, 5]
 
         fibo.blacklist_by_number(5)
 
         assert fibo.by_number(5) is None
+        assert fibo.by_range(0, 6) == [0, 1, 1, 2, 3]
 
     @staticmethod
     def test_whitelist_by_number():
         fibo = FibonacciService()
         fibo.blacklist_by_number(5)
         assert fibo.by_number(5) is None
+        assert fibo.by_range(0, 6) == [0, 1, 1, 2, 3]
 
         fibo.whitelist_by_number(5)
 
         assert fibo.by_number(5) == 5
+        assert fibo.by_range(0, 6) == [0, 1, 1, 2, 3, 5]
