@@ -15,23 +15,18 @@ class FibonacciService:
         self._numbers = [0, 1]
 
     def by_number(self, n: int) -> int:
-        if n < len(self._numbers):
-            return self._numbers[n]
-
-        new_numbers = []
-        a, b = self._numbers[-2], self._numbers[-1]
-        for _ in range(len(self._numbers), n + 1):
-            a, b = b, a + b
-            new_numbers.append(b)
-
-        self._numbers.extend(new_numbers)
+        if n >= len(self._numbers):
+            self._fill_up_to(n)
 
         return self._numbers[n]
 
     def by_range(self, from_: int, to: int) -> List[int]:
-        if to < len(self._numbers):
-            return self._numbers[from_:to]
+        if to >= len(self._numbers):
+            self._fill_up_to(to)
 
+        return self._numbers[from_:to]
+
+    def _fill_up_to(self, to: int) -> None:
         new_numbers = []
         a, b = self._numbers[-2], self._numbers[-1]
         for _ in range(len(self._numbers), to + 1):
@@ -39,8 +34,6 @@ class FibonacciService:
             new_numbers.append(b)
 
         self._numbers.extend(new_numbers)
-
-        return self._numbers[from_:to]
 
     @property
     def numbers(self) -> List[int]:
