@@ -1,20 +1,47 @@
 from fastapi import FastAPI, HTTPException
 
 from .fibonacci import FibonacciService
+from pydantic import BaseModel
+from typing import Any, List
+
+
+class Meta(BaseModel):
+    page: int
+    per_page: int
+    total: int
+
+
+class ResponseListModel(BaseModel):
+    data: List[Any]
+    metadata: Meta
+
+
+class FibonacciNumber(BaseModel):
+    number: int
+    value: int
+
+
+class ResponseModel(BaseModel):
+    data: Any
 
 
 app = FastAPI()
 fibo = FibonacciService()
 
 
-@app.get("/api/fibonacci/{n}")
+@app.get("/api/fibonacci/{n}", response_model=ResponseModel)
 async def fibonacci_by_number(n: int):
     if n < 0:
         raise HTTPException(
             status_code=400, detail=f"Number must be non negative. Received: {n}"
         )
 
-    return {"data": {"value": fibo.by_number(int(n))}}
+    return ResponseModel(
+        data=FibonacciNumber(
+            number=n,
+            value=fibo.by_number(int(n)),
+        ),
+    )
 
 
 @app.get("/api/fibonacci/{from_}/to/{to}")
