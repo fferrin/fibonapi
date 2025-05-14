@@ -19,9 +19,9 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY --from=build /app/requirements.txt .
+COPY --from=base /app/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY --from=build /app .
+COPY --from=base /app .
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
