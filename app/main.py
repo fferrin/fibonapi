@@ -13,18 +13,19 @@ from .schemas import (
 )
 
 
-app = FastAPI()
+app = FastAPI(
+    description="FibonnAPI",
+    version="0.0.1",
+)
 fibo = FibonacciService()
 
 
-@app.get("/api/fibonacci/{n}", response_model=ResponseModel)
-# async def fibonacci_by_number(n: FibonacciIndex):
+@app.get(
+    "/api/fibonacci/{n}",
+    response_model=ResponseModel,
+    tags=["Fibonacci"],
+)
 async def fibonacci_by_number(n: Annotated[int, Path(ge=0)]):
-    if n < 0:
-        raise HTTPException(
-            status_code=400, detail=f"Number must be non negative. Received: {n}"
-        )
-
     return ResponseModel(
         data=FibonacciNumber(
             number=n,
@@ -33,7 +34,11 @@ async def fibonacci_by_number(n: Annotated[int, Path(ge=0)]):
     )
 
 
-@app.get("/api/fibonacci/{from_}/to/{to}", response_model=ResponseListModel)
+@app.get(
+    "/api/fibonacci/{from_}/to/{to}",
+    response_model=ResponseListModel,
+    tags=["Fibonacci"],
+)
 async def fibonacci_by_range(from_: int, to: int):
     if from_ < 0:
         raise HTTPException(
@@ -51,7 +56,11 @@ async def fibonacci_by_range(from_: int, to: int):
     )
 
 
-@app.post("/api/fibonacci/{n}/blacklist", status_code=204)
+@app.post(
+    "/api/fibonacci/{n}/blacklist",
+    status_code=204,
+    tags=["Access Control"],
+)
 async def fibonacci_blacklist_by_number(n: int):
     if n < 0:
         raise HTTPException(
@@ -61,7 +70,11 @@ async def fibonacci_blacklist_by_number(n: int):
     fibo.blacklist_by_number(n)
 
 
-@app.post("/api/fibonacci/{n}/whitelist", status_code=204)
+@app.post(
+    "/api/fibonacci/{n}/whitelist",
+    status_code=204,
+    tags=["Access Control"],
+)
 async def fibonacci_whitelist_by_number(n: int):
     if n < 0:
         raise HTTPException(
