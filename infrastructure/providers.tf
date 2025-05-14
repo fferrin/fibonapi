@@ -10,6 +10,6 @@ terraform {
 }
 
 provider "aws" {
-  profile = "terraform-fibonapi"
+  profile = "terraform-fibonapi-prod"
   region  = local.config.region
 }
