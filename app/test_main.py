@@ -22,10 +22,15 @@ class TestFibonacciEndpoints:
         @staticmethod
         def test_get_bonacci_by_number_invalid_value():
             response = client.get("/api/fibonacci/-1")
-            assert response.status_code == 400
-            assert response.json() == {
-                "detail": "Number must be non negative. Received: -1"
-            }
+            # assert response.status_code == 400
+            # assert response.json() == {
+            #     "detail": "Number must be non negative. Received: -1"
+            # }
+
+            content = response.json()["detail"][0]
+            assert response.status_code == 422
+            assert content["msg"] == "Input should be greater than or equal to 0"
+            assert content["input"] == "-1"
 
         @staticmethod
         def test_get_bonacci_by_number_non_numeric_value():
