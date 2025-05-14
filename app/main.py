@@ -1,13 +1,15 @@
-from fastapi import FastAPI
+from typing import Annotated
+
+from fastapi import FastAPI, Query
 
 from .fibonacci import FibonacciService
 from .schemas import (
-    FibonacciIndex,
     FibonacciNumber,
     FibonacciRange,
-    Meta,
+    FilterParams,
+    Metadata,
     NonNegativeInt,
-    ResponseListModel,
+    PaginatedResponseModel,
     ResponseModel,
 )
 
@@ -17,6 +19,29 @@ app = FastAPI(
     version="0.0.1",
 )
 fibo = FibonacciService()
+
+
+@app.get(
+    "/api/fibonacci",
+    response_model=PaginatedResponseModel,
+    tags=["Fibonacci"],
+)
+async def fibonacci_list(filter_query: Annotated[FilterParams, Query()]):
+    page = filter_query.page
+    page_size = filter_query.page_size
+    from_ = (page - 1) * page_size
+    to = from_ + page_size
+
+    return PaginatedResponseModel(
+        data=FibonacciRange(
+            values=fibo.by_range(from_, to),
+        ),
+        metadata=Metadata(
+            page=page,
+            page_size=page_size,
+            next=f"/api/fibonacci/?page={page + 1}&page_size={page_size}",
+        ),
+    )
 
 
 @app.get(
@@ -35,11 +60,11 @@ async def fibonacci_by_number(n: NonNegativeInt):
 
 @app.get(
     "/api/fibonacci/{from_}/to/{to}",
-    response_model=ResponseListModel,
+    response_model=ResponseModel,
     tags=["Fibonacci"],
 )
 async def fibonacci_by_range(from_: NonNegativeInt, to: NonNegativeInt):
-    return ResponseListModel(
+    return ResponseModel(
         data=FibonacciRange(
             values=fibo.by_range(int(from_), int(to)),
         ),

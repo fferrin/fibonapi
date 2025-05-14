@@ -1,25 +1,30 @@
 from fastapi import Path
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Annotated, Any, List, Optional
 
 
 NonNegativeInt = Annotated[int, Path(ge=0)]
 
 
-class Meta(BaseModel):
+class Metadata(BaseModel):
     page: int
-    per_page: int
-    total: int
+    page_size: int
+    next: Optional[str] = None
+
+
+class FilterParams(BaseModel):
+    page: int = Field(1, gt=0, le=25)
+    page_size: int = Field(100, gt=0, le=100)
 
 
 class ResponseModel(BaseModel):
     data: Any
 
 
-class ResponseListModel(BaseModel):
+class PaginatedResponseModel(BaseModel):
     data: Any
-    metadata: Optional[Meta] = None
+    metadata: Metadata
 
 
 class FibonacciIndex(BaseModel):
