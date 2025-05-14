@@ -1,6 +1,6 @@
 import pytest
 
-from fibonacci import FibonacciService
+from .fibonacci import FibonacciService
 
 
 class TestFibonacciService:
