@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from .main import app
@@ -7,6 +8,26 @@ client = TestClient(app)
 
 
 class TestFibonacciEndpoints:
+    @staticmethod
+    @pytest.mark.parametrize(
+        ("method", "endpoint"),
+        (
+            ("GET", "/api/fibonacci/-1"),
+            ("GET", "/api/fibonacci/-1/to/6"),
+            ("GET", "/api/fibonacci/0/to/-1"),
+            ("POST", "/api/fibonacci/-1/blacklist"),
+            ("POST", "/api/fibonacci/-1/whitelist"),
+        ),
+    )
+    def test_fibonacci_numbers_must_be_non_negatives(method, endpoint):
+        action = getattr(client, method.lower())
+        response = action(endpoint)
+
+        content = response.json()["detail"][0]
+        assert response.status_code == 422
+        assert content["msg"] == "Input should be greater than or equal to 0"
+        assert content["input"] == "-1"
+
     class TestByNumber:
         @staticmethod
         def test_get_bonacci_by_number():
@@ -18,19 +39,6 @@ class TestFibonacciEndpoints:
                     "value": 832_040,
                 }
             }
-
-        @staticmethod
-        def test_get_bonacci_by_number_invalid_value():
-            response = client.get("/api/fibonacci/-1")
-            # assert response.status_code == 400
-            # assert response.json() == {
-            #     "detail": "Number must be non negative. Received: -1"
-            # }
-
-            content = response.json()["detail"][0]
-            assert response.status_code == 422
-            assert content["msg"] == "Input should be greater than or equal to 0"
-            assert content["input"] == "-1"
 
         @staticmethod
         def test_get_bonacci_by_number_non_numeric_value():
@@ -50,14 +58,6 @@ class TestFibonacciEndpoints:
             }
 
         @staticmethod
-        def test_with_number_invalid_value():
-            response = client.get("/api/fibonacci/-1/to/6")
-            assert response.status_code == 400
-            assert response.json() == {
-                "detail": "Number must be non negative. Received: -1"
-            }
-
-        @staticmethod
         def test_non_numeric_value():
             response = client.get("/api/fibonacci/foo/to/6")
             assert response.status_code == 422
@@ -69,14 +69,6 @@ class TestFibonacciEndpoints:
             assert response.status_code == 204
 
         @staticmethod
-        def test_blacklist_with_number_invalid_value():
-            response = client.post("/api/fibonacci/-1/blacklist")
-            assert response.status_code == 400
-            assert response.json() == {
-                "detail": "Number must be non negative. Received: -1"
-            }
-
-        @staticmethod
         def test_blacklist_non_numeric_value():
             response = client.post("/api/fibonacci/foo/blacklist")
             assert response.status_code == 422
@@ -85,14 +77,6 @@ class TestFibonacciEndpoints:
         def test_whitelist_by_number():
             response = client.post("/api/fibonacci/0/whitelist")
             assert response.status_code == 204
-
-        @staticmethod
-        def test_whitelist_with_number_invalid_value():
-            response = client.post("/api/fibonacci/-1/whitelist")
-            assert response.status_code == 400
-            assert response.json() == {
-                "detail": "Number must be non negative. Received: -1"
-            }
 
         @staticmethod
         def test_whitelist_non_numeric_value():

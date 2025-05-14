@@ -1,15 +1,14 @@
-from typing import Annotated
-
-from fastapi import FastAPI, HTTPException, Path
+from fastapi import FastAPI
 
 from .fibonacci import FibonacciService
 from .schemas import (
-    Meta,
-    ResponseModel,
-    ResponseListModel,
     FibonacciIndex,
     FibonacciNumber,
     FibonacciRange,
+    Meta,
+    NonNegativeInt,
+    ResponseListModel,
+    ResponseModel,
 )
 
 
@@ -25,7 +24,7 @@ fibo = FibonacciService()
     response_model=ResponseModel,
     tags=["Fibonacci"],
 )
-async def fibonacci_by_number(n: Annotated[int, Path(ge=0)]):
+async def fibonacci_by_number(n: NonNegativeInt):
     return ResponseModel(
         data=FibonacciNumber(
             number=n,
@@ -39,16 +38,7 @@ async def fibonacci_by_number(n: Annotated[int, Path(ge=0)]):
     response_model=ResponseListModel,
     tags=["Fibonacci"],
 )
-async def fibonacci_by_range(from_: int, to: int):
-    if from_ < 0:
-        raise HTTPException(
-            status_code=400, detail=f"Number must be non negative. Received: {from_}"
-        )
-    elif to < 0:
-        raise HTTPException(
-            status_code=400, detail=f"Number must be non negative. Received: {to}"
-        )
-
+async def fibonacci_by_range(from_: NonNegativeInt, to: NonNegativeInt):
     return ResponseListModel(
         data=FibonacciRange(
             values=fibo.by_range(int(from_), int(to)),
@@ -61,12 +51,7 @@ async def fibonacci_by_range(from_: int, to: int):
     status_code=204,
     tags=["Access Control"],
 )
-async def fibonacci_blacklist_by_number(n: int):
-    if n < 0:
-        raise HTTPException(
-            status_code=400, detail=f"Number must be non negative. Received: {n}"
-        )
-
+async def fibonacci_blacklist_by_number(n: NonNegativeInt):
     fibo.blacklist_by_number(n)
 
 
@@ -75,10 +60,5 @@ async def fibonacci_blacklist_by_number(n: int):
     status_code=204,
     tags=["Access Control"],
 )
-async def fibonacci_whitelist_by_number(n: int):
-    if n < 0:
-        raise HTTPException(
-            status_code=400, detail=f"Number must be non negative. Received: {n}"
-        )
-
+async def fibonacci_whitelist_by_number(n: NonNegativeInt):
     fibo.whitelist_by_number(n)
