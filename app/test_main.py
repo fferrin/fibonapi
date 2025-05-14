@@ -28,6 +28,29 @@ class TestFibonacciEndpoints:
         assert content["msg"] == "Input should be greater than or equal to 0"
         assert content["input"] == "-1"
 
+    @staticmethod
+    @pytest.mark.parametrize(
+        ("method", "endpoint"),
+        (
+            ("GET", "/api/fibonacci/foobar"),
+            ("GET", "/api/fibonacci/foobar/to/6"),
+            ("GET", "/api/fibonacci/0/to/foobar"),
+            ("POST", "/api/fibonacci/foobar/blacklist"),
+            ("POST", "/api/fibonacci/foobar/whitelist"),
+        ),
+    )
+    def test_fibonacci_numbers_must_be_numbers(method, endpoint):
+        action = getattr(client, method.lower())
+        response = action(endpoint)
+
+        content = response.json()["detail"][0]
+        assert response.status_code == 422
+        assert (
+            content["msg"]
+            == "Input should be a valid integer, unable to parse string as an integer"
+        )
+        assert content["input"] == "foobar"
+
     class TestByNumber:
         @staticmethod
         def test_get_bonacci_by_number():
@@ -39,11 +62,6 @@ class TestFibonacciEndpoints:
                     "value": 832_040,
                 }
             }
-
-        @staticmethod
-        def test_get_bonacci_by_number_non_numeric_value():
-            response = client.get("/api/fibonacci/foo")
-            assert response.status_code == 422
 
     class TestByRange:
         @staticmethod
@@ -57,11 +75,6 @@ class TestFibonacciEndpoints:
                 "metadata": None,
             }
 
-        @staticmethod
-        def test_non_numeric_value():
-            response = client.get("/api/fibonacci/foo/to/6")
-            assert response.status_code == 422
-
     class TestWhiteAndBlacklist:
         @staticmethod
         def test_blacklist_by_number():
@@ -69,16 +82,6 @@ class TestFibonacciEndpoints:
             assert response.status_code == 204
 
         @staticmethod
-        def test_blacklist_non_numeric_value():
-            response = client.post("/api/fibonacci/foo/blacklist")
-            assert response.status_code == 422
-
-        @staticmethod
         def test_whitelist_by_number():
             response = client.post("/api/fibonacci/0/whitelist")
             assert response.status_code == 204
-
-        @staticmethod
-        def test_whitelist_non_numeric_value():
-            response = client.post("/api/fibonacci/foo/whitelist")
-            assert response.status_code == 422
